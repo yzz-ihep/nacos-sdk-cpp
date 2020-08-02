@@ -2,7 +2,7 @@
 
 # Nacos-sdk-cpp
 
-Nacos-sdk-cpp for c++ clients allows users to access Nacos service,it's support service discovery and dynamic configuration.
+Nacos-sdk-cpp for c++ clients allow users to access Nacos service,it's support service discovery and dynamic configuration.
 
 
 [![Gitter](https://badges.gitter.im/alibaba/nacos.svg)](https://gitter.im/alibaba/nacos?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)   [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
