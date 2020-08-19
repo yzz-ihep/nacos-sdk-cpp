@@ -61,7 +61,9 @@ namespace Nacos
 
 	std::wstring AddListenerRequest::getListeningConfigs() const
 	{
-		return StringHelper::isEmptyOrWhiteSpace(getTenant()) ? std::wstring::Format("{0}{1}{2}{3}{4}{5}", getDataId(), CharacterUtil::TwoEncode, getGroup(), CharacterUtil::TwoEncode, getContentMD5(), CharacterUtil::OneEncode) : std::wstring::Format(L"{0}{1}{2}{3}{4}{5}{6}{7}", getDataId(), CharacterUtil::TwoEncode, getGroup(), CharacterUtil::TwoEncode, getContentMD5(), CharacterUtil::TwoEncode, getTenant(), CharacterUtil::OneEncode);
+		return StringHelper::isEmptyOrWhiteSpace(getTenant()) ?
+		std::wstring::Format("{0}{1}{2}{3}{4}{5}", getDataId(), CharacterUtil::TwoEncode, getGroup(), CharacterUtil::TwoEncode, getContentMD5(), CharacterUtil::OneEncode) :
+		std::wstring::Format(L"{0}{1}{2}{3}{4}{5}{6}{7}", getDataId(), CharacterUtil::TwoEncode, getGroup(), CharacterUtil::TwoEncode, getContentMD5(), CharacterUtil::TwoEncode, getTenant(), CharacterUtil::OneEncode);
 	}
 
 	void AddListenerRequest::CheckParam()
