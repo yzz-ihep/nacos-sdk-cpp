@@ -4,12 +4,13 @@
 #include "Debug.h"
 #include "DebugAssertion.h"
 #include "listen/Listener.h"
-#include "http/ServerHttpAgent.h"
+#include "src/http/HttpDelegate.h"
 #include "factory/NacosServiceFactory.h"
 #include "ResourceGuard.h"
 #include "PropertyKeyConst.h"
 
 using namespace std;
+using namespace nacos;
 
 class KeyChangeListener : public Listener {
 private:
@@ -48,8 +49,7 @@ bool testAddListener() {
         return false;
     }
 
-    cout << "Input a character to continue" << endl;
-    getchar();
     SHOULD_BE_TRUE(bSucc, "Publish should succeed");
+    cout << "test successful" << endl;
     return true;
 }

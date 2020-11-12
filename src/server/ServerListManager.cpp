@@ -1,14 +1,15 @@
 #include <stdlib.h>
 #include <unistd.h>
-#include "server/ServerListManager.h"
+#include "ServerListManager.h"
 #include "PropertyKeyConst.h"
 #include "Parameters.h"
 #include "utils/ParamUtils.h"
 #include "Debug.h"
-#include "json/JSON.h"
+#include "src/json/JSON.h"
 
 using namespace std;
 
+namespace nacos{
 void ServerListManager::addToSrvList(NacosString &address) {
     //If the address doesn't contain port, add 8848 as the default port for it
     if (address.find(':') == std::string::npos) {
@@ -94,9 +95,9 @@ void ServerListManager::initAll() throw(NacosException) {
     }
 }
 
-ServerListManager::ServerListManager(HTTPCli *_httpCli, AppConfigManager *_appConfigManager) throw(NacosException) {
+ServerListManager::ServerListManager(HttpDelegate *httpDelegate, AppConfigManager *_appConfigManager) throw(NacosException) {
     started = false;
-    this->httpCli = _httpCli;
+    this->_httpDelegate = httpDelegate;
     this->appConfigManager = _appConfigManager;
     refreshInterval = atoi(appConfigManager->get(PropertyKeyConst::SRVLISTMGR_REFRESH_INTERVAL).c_str());
     _read_timeout = atoi(appConfigManager->get(PropertyKeyConst::SRVLISTMGR_READ_TIMEOUT).c_str());
@@ -120,7 +121,7 @@ list <NacosServerInfo> ServerListManager::tryPullServerListFromNacosServer() thr
         log_debug("selected_server:%d\n", selectedServer);
         log_debug("Trying to access server:%s\n", server.getCompleteAddress().c_str());
         try {
-            HttpResult serverRes = httpCli->httpGet(
+            HttpResult serverRes = _httpDelegate->httpGet(
                     server.getCompleteAddress() + "/" + DEFAULT_CONTEXT_PATH + "/" + PROTOCOL_VERSION + "/" +
                     GET_SERVERS_PATH,
                     headers, paramValues, NULLSTR, _read_timeout);
@@ -148,9 +149,30 @@ list <NacosServerInfo> ServerListManager::pullServerList() throw(NacosException)
     std::list <NacosString> paramValues;
 
     if (!NacosStringOps::isNullStr(addressServerUrl)) {
-        HttpResult serverRes = httpCli->httpGet(addressServerUrl, headers, paramValues, NULLSTR,
+        HttpResult serverRes = _httpDelegate->httpGet(addressServerUrl, headers, paramValues, NULLSTR,
                                                 _read_timeout);
-        list <NacosServerInfo> serversPulled = JSON::Json2NacosServerInfo(serverRes.content);
+        list<NacosString> explodedServerList;
+        ParamUtils::Explode(explodedServerList, serverRes.content, '\n');
+        list <NacosServerInfo> serversPulled;
+
+        for (list<NacosString>::const_iterator it = explodedServerList.begin();
+                it != explodedServerList.end(); it++) {
+            NacosServerInfo curServer;
+            size_t pos = it->find(":");
+            if (pos == std::string::npos) {
+                curServer.setIp(*it);
+                curServer.setPort(8848);
+            } else {
+                NacosString ip = it->substr(0, pos);
+                NacosString port = it->substr(pos);
+
+                curServer.setIp(ip);
+                curServer.setPort(atoi(port.c_str()));
+            }
+            curServer.setAlive(true);
+            serversPulled.push_back(curServer);
+        }
+
         serversPulled.sort();
 
         log_debug("pullServerList: servers list: %s\n", serverListToString(serversPulled).c_str());
@@ -237,6 +259,7 @@ void ServerListManager::stop() {
     started = false;
     if (_pullThread != NULL) {
         _pullThread->join();
+        _pullThread = NULL;
     }
 }
 
@@ -269,3 +292,4 @@ list <NacosServerInfo> ServerListManager::getServerList() {
     }
     return res;
 };
+}//namespace nacos

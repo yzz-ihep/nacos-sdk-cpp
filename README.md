@@ -1,14 +1,94 @@
-<img src="https://github.com/alibaba/nacos/blob/develop/doc/Nacos_Logo.png" width="50%" height="50%" />
+<img src="https://github.com/alibaba/nacos/blob/develop/doc/Nacos_Logo.png" width="50%" height="50%" /> 
+
+[中文版本说明请点这里](https://github.com/nacos-group/nacos-sdk-cpp/blob/master/README_zh_CN.md)
 
 # Nacos-sdk-cpp
 
-Nacos-sdk-cpp for c++ clients allow users to access Nacos service,it's support service discovery and dynamic configuration.
+Nacos-sdk-cpp for c++ clients allow users to access Nacos service, it supports service discovery and dynamic configuration.
 
 
 [![Gitter](https://badges.gitter.im/alibaba/nacos.svg)](https://gitter.im/alibaba/nacos?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)   [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Gitter](https://travis-ci.org/alibaba/nacos.svg?branch=master)](https://travis-ci.org/alibaba/nacos)
 
 # Quick Examples
+## Setup project
+Download the source and run the following command in bash:
+
+`cd nacos-sdk-cpp`
+
+`make`
+
+a libnacos-cli.so and a nacos-cli.out will be generated
+
+run `./nacos-cli.out` to perform test on the library
+
+**Note: You need to run a nacos server on your local machine listening on port 8848 to go through the whole test
+One of the testcases will test endpoint functionality, so you also need to run a simple http server on port 80 which provides the following content:
+
+`127.0.0.1:8848`
+
+**on path /endpoints/endpoint0
+
+## Integrate the library into your project
+
+Here is an example showing how to integrate the library(.so) into your project:
+
+Create a file named IntegratingIntoYourProject.cpp:
+```C++
+#include <iostream>
+#include "factory/NacosServiceFactory.h"
+#include "PropertyKeyConst.h"
+#include "DebugAssertion.h"
+#include "ResourceGuard.h"
+#include "Debug.h"
+#include "NacosString.h"
+
+using namespace std;
+using namespace nacos;
+
+int main() {
+    Properties props;
+    props[PropertyKeyConst::SERVER_ADDR] = "127.0.0.1:8848";//Server address
+    NacosServiceFactory *factory = new NacosServiceFactory(props);
+    ResourceGuard <NacosServiceFactory> _guardFactory(factory);
+    ConfigService *n = factory->CreateConfigService();
+    ResourceGuard <ConfigService> _serviceFactory(n);
+    NacosString ss = "";
+    try {
+        ss = n->getConfig("k", NULLSTR, 1000);
+    }
+    catch (NacosException &e) {
+        cout <<
+             "Request failed with curl code:" << e.errorcode() << endl <<
+             "Reason:" << e.what() << endl;
+        return -1;
+    }
+    cout << ss << endl;
+
+    return 0;
+}
+
+```
+
+`g++ IntegratingIntoYourProject.cpp -L. -lnacos-cli -Iinclude -o integrated.out`
+
+Start a nacos on your localmachine listening on port 8848, and run `./integrated.out`
+
+Then you'll see:
+
+`SuccessfullyIntegrated`
+
+You may come across the following problem:
+
+`error while loading shared libraries: libnacos-cli.so: cannot open shared object file: No such file or directory`
+
+**solution:**
+
+assume that your libnacos-cli.so resides in /usr/local/libnacos/
+`export LD_LIBRARY_PATH=/usr/local/libnacos/` (DON'T include the so file's name)
+
+or you can use ldconfig to add libnacos-cli.so to your lib path.
+
 ## Configuration
 
 ### Get Config
@@ -21,6 +101,7 @@ Nacos-sdk-cpp for c++ clients allow users to access Nacos service,it's support s
 #include "Debug.h"
 
 using namespace std;
+using namespace nacos;
 
 int main() {
     Properties props;
@@ -58,6 +139,7 @@ int main() {
 #include "Debug.h"
 
 using namespace std;
+using namespace nacos;
 
 int main() {
     Properties props;
@@ -108,6 +190,7 @@ int main() {
 #include "Debug.h"
 
 using namespace std;
+using namespace nacos;
 
 class MyListener : public Listener {
 private:
@@ -169,6 +252,7 @@ int main() {
 #include "PropertyKeyConst.h"
 
 using namespace std;
+using namespace nacos;
 
 int main() {
     Properties configProps;
@@ -229,6 +313,7 @@ int main() {
 #include "Debug.h"
 
 using namespace std;
+using namespace nacos;
 
 class MyServiceListener : public EventListener {
 private:
@@ -297,6 +382,7 @@ int main() {
 #include "ResourceGuard.h"
 
 using namespace std;
+using namespace nacos;
 
 int main() {
     Properties configProps;
@@ -321,4 +407,4 @@ int main() {
 
 Nacos (official site: [http://nacos.io](http://nacos.io)) is an easy-to-use platform designed for dynamic service discovery and configuration and service management. It helps you to build cloud native applications and microservices platform easily.
 
-Service is a first-class citizen in Nacos. Nacos supports almost all type of services，for example，[Dubbo/gRPC service](https://nacos.io/en-us/docs/use-nacos-with-dubbo.html)、[Spring Cloud RESTFul service](https://nacos.io/en-us/docs/use-nacos-with-springcloud.html) or [Kubernetes service](https://nacos.io/en-us/docs/use-nacos-with-kubernetes.html).
+Service is a first-class citizen in Nacos. Nacos supports almost all type of services, for example: [Dubbo/gRPC service](https://nacos.io/en-us/docs/use-nacos-with-dubbo.html), [Spring Cloud RESTFul service](https://nacos.io/en-us/docs/use-nacos-with-springcloud.html) and [Kubernetes service](https://nacos.io/en-us/docs/use-nacos-with-kubernetes.html).

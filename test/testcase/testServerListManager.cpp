@@ -1,17 +1,15 @@
 #include <iostream>
 #include <map>
-#include "server/ServerListManager.h"
-#include "config/NacosConfigService.h"
+#include "src/server/ServerListManager.h"
+#include "src/config/NacosConfigService.h"
 #include "factory/NacosServiceFactory.h"
 #include "ResourceGuard.h"
-#include "http/HTTPCli.h"
+#include "src/http/HTTPCli.h"
 #include "PropertyKeyConst.h"
-#include "DebugAssertion.h"
-#include "Debug.h"
-#include "json/JSON.h"
-#include "Constants.h"
+#include "src/json/JSON.h"
 
 using namespace std;
+using namespace nacos;
 
 bool testServerListManager() {
     cout << "in function testServerListManager" << endl;
@@ -22,10 +20,10 @@ bool testServerListManager() {
     ConfigService *n = factory->CreateConfigService();
     ResourceGuard <ConfigService> _serviceFactory(n);
 
-    NacosConfigService *nn = (NacosConfigService *) n;
-    ServerListManager *serverListManager = nn->getServerListManager();
+    //NacosConfigService *nn = (NacosConfigService *) n;
+    //ServerListManager *serverListManager = nn->getServerListManager();
 
-    list <NacosServerInfo> res = serverListManager->__debug();
+    list <NacosServerInfo> res;// = serverListManager->__debug();
 
     for (list<NacosServerInfo>::iterator it = res.begin(); it != res.end(); it++) {
         NacosString key = it->getKey();

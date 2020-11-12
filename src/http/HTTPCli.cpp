@@ -1,10 +1,11 @@
 #include <string.h>
-#include "http/HTTPCli.h"
+#include "HTTPCli.h"
 #include "utils/url.h"
 #include "Debug.h"
 
 using namespace std;
 
+namespace nacos{
 static size_t
 receiveResponseCallback(
         void *contents,
@@ -587,6 +588,10 @@ HttpResult HTTPCli::httpDeleteInternal
 }
 
 HTTPCli::~HTTPCli() {
+    CURL *curlHandle = pthread_getspecific(pthreadKey);
+    if (curlHandle != NULL) {
+        curl_easy_cleanup(curlHandle);
+    }
     pthread_key_delete(pthreadKey);
 }
 
@@ -597,3 +602,4 @@ void HTTPCli::HTTP_GLOBAL_INIT() {
 void HTTPCli::HTTP_GLOBAL_DEINIT() {
     curl_global_cleanup();
 }
+}//namespace nacos

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include "factory/NacosServiceFactory.h"
 #include "ResourceGuard.h"
@@ -9,6 +10,7 @@
 #include "Debug.h"
 
 using namespace std;
+using namespace nacos;
 
 class MyListener : public Listener {
 private:
@@ -27,7 +29,7 @@ public:
 };
 
 bool testListeningKeys() {
-    cout << "in function testPublishConfig" << endl;
+    cout << "in function testListeningKeys" << endl;
     Properties props;
     props[PropertyKeyConst::SERVER_ADDR] = "127.0.0.1:8848";
     NacosServiceFactory *factory = new NacosServiceFactory(props);
@@ -50,17 +52,17 @@ bool testListeningKeys() {
         n->addListener(strKey, NULLSTR, theListener3);
     }
 
-    cout << "Input a character to continue" << endl;
-    getchar();
+    cout << "Hold for 2 mins" << endl;
+    sleep(120);
     cout << "remove listener" << endl;
     n->removeListener("dqid", NULLSTR, theListener);
 
-    cout << "Input a character to continue" << endl;
-    getchar();
+    cout << "Hold for 2 mins" << endl;
+    sleep(120);
     cout << "remove listener2" << endl;
     n->removeListener("dqid", NULLSTR, theListener2);
     n->removeListener("dqid", NULLSTR, theListener3);
-    getchar();
+    cout << "test successful" << endl;
 
     return true;
 }

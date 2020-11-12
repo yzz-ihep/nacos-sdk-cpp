@@ -3,9 +3,13 @@
 
 #include "NacosString.h"
 
+namespace nacos{
 class UtilAndComs {
 public:
     static NacosString VERSION;
+
+    //for libcurl
+    static NacosString UA_VERSION;
 
     static NacosString WEB_CONTEXT;
 
@@ -37,5 +41,6 @@ public:
 
     static void Init();
 };
+}//namespace nacos
 
 #endif

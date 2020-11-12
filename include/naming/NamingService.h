@@ -9,6 +9,7 @@
 #include "NacosExceptions.h"
 #include "ListView.h"
 
+namespace nacos{
 class NamingService {
 public:
     /**
@@ -195,7 +196,7 @@ public:
     */
     virtual std::list<Instance> getInstanceWithPredicate(const NacosString &serviceName, const NacosString &groupName,
                                                          const std::list <NacosString> &clusters,
-                                                         Selector<Instance> *predicate) throw(NacosException) = 0;
+                                                         nacos::naming::selectors::Selector<Instance> *predicate) throw(NacosException) = 0;
 
     /**
      * Get instances with the predicate specified
@@ -208,7 +209,7 @@ public:
      */
     virtual std::list<Instance> getInstanceWithPredicate(const NacosString &serviceName,
                                                          const std::list <NacosString> &clusters,
-                                                         Selector<Instance> *predicate) throw(NacosException) = 0;
+                                                         nacos::naming::selectors::Selector<Instance> *predicate) throw(NacosException) = 0;
 
     /**
     * Get instances with the predicate specified
@@ -220,7 +221,7 @@ public:
     * @throw (NacosException) = 0
     */
     virtual std::list<Instance> getInstanceWithPredicate(const NacosString &serviceName, const NacosString &groupName,
-                                                         Selector<Instance> *predicate) throw(NacosException) = 0;
+                                                         nacos::naming::selectors::Selector<Instance> *predicate) throw(NacosException) = 0;
 
     /**
     * Get instances with the predicate specified
@@ -230,7 +231,7 @@ public:
     * @return A list of qualified instance
     * @throw (NacosException) = 0
     */
-    virtual std::list<Instance> getInstanceWithPredicate(const NacosString &serviceName, Selector<Instance> *predicate) throw(NacosException) = 0;
+    virtual std::list<Instance> getInstanceWithPredicate(const NacosString &serviceName, nacos::naming::selectors::Selector<Instance> *predicate) throw(NacosException) = 0;
 
     /**
      * Get qualified instances of service
@@ -550,5 +551,6 @@ public:
 
     virtual ~NamingService() {};
 };
+}//namespace nacos
 
 #endif

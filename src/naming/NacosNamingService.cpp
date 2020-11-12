@@ -1,22 +1,26 @@
-#include "naming/NacosNamingService.h"
-#include "naming/beat/BeatReactor.h"
+#include "src/naming/NacosNamingService.h"
+#include "src/naming/beat/BeatReactor.h"
 #include "utils/NamingUtils.h"
 #include "utils/UtilAndComs.h"
 #include "utils/ParamUtils.h"
 #include "PropertyKeyConst.h"
-#include "json/JSON.h"
+#include "src/json/JSON.h"
 
 using namespace std;
+using nacos::naming::selectors::Selector;
 
-NacosNamingService::NacosNamingService(HTTPCli *_httpCli, NamingProxy *_serverProxy, BeatReactor *_beatReactor,
+namespace nacos{
+NacosNamingService::NacosNamingService(HttpDelegate *httpDelegate, IHttpCli *httpCli, NamingProxy *_serverProxy, BeatReactor *_beatReactor,
                                        EventDispatcher *eventDispatcher, TcpNamingServicePoller *tcpNamingServicePoller,
-                                       AppConfigManager *appConfigManager) {
+                                       AppConfigManager *appConfigManager, ServerListManager *serverListManager) {
     _appConfigMgr = appConfigManager;
-    httpCli = _httpCli;
+    _httpCli = httpCli;
+    _httpDelegate = httpDelegate;
     serverProxy = _serverProxy;
     beatReactor = _beatReactor;
     _eventDispatcher = eventDispatcher;
     _tcpNamingServicePoller = tcpNamingServicePoller;
+    _serverListManager = serverListManager;
     beatReactor->start();
     _tcpNamingServicePoller->start();
 }
@@ -27,27 +31,37 @@ NacosNamingService::~NacosNamingService() {
     }
     beatReactor = NULL;
 
-    if (_eventDispatcher != NULL)
-    {
-        delete _eventDispatcher;
-    }
-    _eventDispatcher = NULL;
-
     if (_tcpNamingServicePoller != NULL)
     {
         delete _tcpNamingServicePoller;
     }
     _tcpNamingServicePoller = NULL;
 
+    if (_eventDispatcher != NULL)
+    {
+        delete _eventDispatcher;
+    }
+    _eventDispatcher = NULL;
+
     if (serverProxy != NULL) {
         delete serverProxy;
     }
     serverProxy = NULL;
 
-    if (httpCli != NULL) {
-        delete httpCli;
+    if (_serverListManager != NULL) {
+        delete _serverListManager;
     }
-    httpCli = NULL;
+    _serverListManager = NULL;
+
+    if (_httpDelegate != NULL) {
+        delete _httpDelegate;
+    }
+    _httpDelegate = NULL;
+
+    if (_httpCli != NULL) {
+        delete _httpCli;
+    }
+    _httpCli = NULL;
 
     if (_appConfigMgr != NULL)
     {
@@ -336,7 +350,11 @@ list<Instance> NacosNamingService::getInstanceWithPredicate
 ) throw(NacosException)
 {
     list<Instance> allInstances = getAllInstances(serviceName, groupName, clusters);
-    return predicate->select(allInstances);
+    if (predicate) {
+        return predicate->select(allInstances);
+    } else {
+        return allInstances;
+    }
 }
 
 list<Instance> NacosNamingService::getInstanceWithPredicate
@@ -347,7 +365,11 @@ list<Instance> NacosNamingService::getInstanceWithPredicate
 ) throw(NacosException)
 {
     list<Instance> allInstances = getAllInstances(serviceName, Constants::DEFAULT_GROUP, clusters);
-    return predicate->select(allInstances);
+    if (predicate) {
+        return predicate->select(allInstances);
+    } else {
+        return allInstances;
+    }
 }
 
 list<Instance> NacosNamingService::getInstanceWithPredicate
@@ -359,7 +381,11 @@ list<Instance> NacosNamingService::getInstanceWithPredicate
 {
     list<NacosString> clusters;
     list<Instance> allInstances = getAllInstances(serviceName, groupName, clusters);
-    return predicate->select(allInstances);
+    if (predicate) {
+        return predicate->select(allInstances);
+    } else {
+        return allInstances;
+    }
 }
 
 list<Instance> NacosNamingService::getInstanceWithPredicate
@@ -370,6 +396,10 @@ list<Instance> NacosNamingService::getInstanceWithPredicate
 {
     list<NacosString> clusters;
     list<Instance> allInstances = getAllInstances(serviceName, Constants::DEFAULT_GROUP, clusters);
-    return predicate->select(allInstances);
+    if (predicate) {
+        return predicate->select(allInstances);
+    } else {
+        return allInstances;
+    }
 }
-
+}//namespace nacos

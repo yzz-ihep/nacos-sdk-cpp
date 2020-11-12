@@ -1,11 +1,12 @@
 #include <map>
-#include "naming/beat/BeatReactor.h"
-#include "naming/beat/BeatTask.h"
+#include "BeatReactor.h"
+#include "BeatTask.h"
 #include "NacosString.h"
 #include "DebugAssertion.h"
 
 using namespace std;
 
+namespace nacos{
 void BeatReactor::start() {
     _stop = false;
     _beatMaster->start();
@@ -63,7 +64,66 @@ void BeatReactor::addBeatInfo(const NacosString &serviceName, BeatInfo &beatInfo
     //TODO:MetricsMonitor.getDom2BeatSizeMonitor().set(dom2Beat.size());
 }
 
-void BeatReactor::removeBeatInfo(const NacosString &serviceName, const NacosString &ip, int port) {
+/**
+* Looks up a beatInfo and return it via beatInfo
+* @param serviceName the service name
+* @param ip the service's ip
+* @param port the service's port
+* @param beatInfo the beatInfo, ip and port must be set and cannot be changed via this function
+* @return false if beatInfo can't be found with designated serviceName, ip and port
+*         true if beatInfo is found
+ *        the BeatInfo is returned via beatInfo parameter
+*/
+bool BeatReactor::getBeatInfo(const NacosString &serviceName, const NacosString &ip, int port, BeatInfo &beatInfo) {
+    NacosString beatKey = buildKey(serviceName, ip, port);
+    {
+        LockGuard _lockguard(_beatInfoLock);
+        if (_beatInfoList.count(beatKey) == 0) {
+            return false;
+        }
+
+        beatInfo = _beatInfoList[beatKey]->getBeatInfo();
+        return true;
+    }
+}
+
+/**
+* Modifies a beatInfo
+* @param serviceName the service name
+* @param beatInfo the beatInfo, ip and port must be set and cannot be changed via this function
+* @return false if nothing is modified (e.g.: the beatInfo doesn't exist in BeatReactor)
+*         true if modification is performed
+*/
+bool BeatReactor::modifyBeatInfo(const NacosString &serviceName, BeatInfo &beatInfo) {
+    NacosString beatInfoStr = beatInfo.toString();
+    log_info("[BEAT] modify beat: %s to beat map.", beatInfoStr.c_str());
+    NacosString beatKey = buildKey(serviceName, beatInfo.ip, beatInfo.port);
+    {
+        LockGuard _lockguard(_beatInfoLock);
+        if (_beatInfoList.count(beatKey) != 0) {
+            log_warn("Modifying non-existent key:%s\n", beatKey.c_str());
+            return false;
+        }
+        BeatInfo originalBeatInfo = _beatInfoList[beatKey]->getBeatInfo();
+        originalBeatInfo.weight = beatInfo.weight;
+        originalBeatInfo.cluster = beatInfo.cluster;
+        originalBeatInfo.metadata = beatInfo.metadata;
+
+        _beatInfoList[beatKey]->setBeatInfo(originalBeatInfo);//modified
+    }
+
+    return true;
+}
+
+/**
+* Removes a beatInfo
+* @param serviceName the service name
+* @param ip the service's ip
+* @param port the service's port
+* @return false if nothing is removed (e.g.: the beatInfo doesn't exist in BeatReactor)
+*         true if a beatInfo is removed
+*/
+bool BeatReactor::removeBeatInfo(const NacosString &serviceName, const NacosString &ip, int port) {
     log_info("[BEAT] removing beat: %s:%s:%d from beat map.", serviceName.c_str(), ip.c_str(), port);
     NacosString beatKey = buildKey(serviceName, ip, port);
     BeatTask *beattask = NULL;
@@ -72,7 +132,7 @@ void BeatReactor::removeBeatInfo(const NacosString &serviceName, const NacosStri
         //If we can't find the beatInfo in the list, just return
         if (_beatInfoList.count(beatKey) != 1) {
             log_warn("Removing non-existent key:%s\n", beatKey.c_str());
-            return;
+            return false;
         }
         beattask = _beatInfoList[beatKey];
         _beatInfoList.erase(beatKey);
@@ -83,6 +143,8 @@ void BeatReactor::removeBeatInfo(const NacosString &serviceName, const NacosStri
         delete beattask;
     }
     //TODO:MetricsMonitor.getDom2BeatSizeMonitor().set(dom2Beat.size());
+
+    return true;
 }
 
 void BeatReactor::removeAllBeatInfo() {
@@ -102,3 +164,4 @@ NacosString BeatReactor::buildKey(const NacosString &serviceName, const NacosStr
     return serviceName + Constants::NAMING_INSTANCE_ID_SPLITTER
            + ip + Constants::NAMING_INSTANCE_ID_SPLITTER + NacosStringOps::valueOf(port);
 }
+}//namespace nacos

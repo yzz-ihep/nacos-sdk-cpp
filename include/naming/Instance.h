@@ -4,6 +4,9 @@
 #include <map>
 #include "NacosString.h"
 
+namespace nacos{
+
+//a service instance
 class Instance {
 public:
     Instance & operator = (const Instance &rhs);
@@ -59,6 +62,10 @@ public:
     */
     NacosString serviceName;
 
+    NacosString groupName;
+
+    NacosString namespaceId;
+
     /**
     * user extended attributes
     */
@@ -67,5 +74,6 @@ public:
     NacosString toString() const;
     NacosString toInetAddr();
 };
+}//namespace nacos
 
 #endif

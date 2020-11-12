@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include "factory/NacosServiceFactory.h"
 #include "ResourceGuard.h"
@@ -9,6 +10,7 @@
 #include "Debug.h"
 
 using namespace std;
+using namespace nacos;
 
 class MyServiceListener : public EventListener {
 private:
@@ -37,18 +39,15 @@ bool testListenService() {
     ResourceGuard <NamingService> _serviceFactory(n);
 
     n->subscribe("ss", new MyServiceListener(1));
-    cout << "Press any key to register services" << endl;
-    getchar();
 
     n->registerInstance("ss", "127.0.0.1", 33);
     n->registerInstance("ss", "127.0.0.1", 34);
-    cout << "Press any key to deregister services" << endl;
-    getchar();
+    cout << "Hold for 1 min" << endl;
+    sleep(60);
 
     n->deregisterInstance("ss", "127.0.0.1", 33);
     n->deregisterInstance("ss", "127.0.0.1", 34);
-    cout << "All instances Unregistered, press any key to finish testing" << endl;
-    getchar();
+    cout << "All instances Unregistered" << endl;
 
     return true;
 }

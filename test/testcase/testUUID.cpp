@@ -1,8 +1,9 @@
 #include <iostream>
 #include "utils//UuidUtils.h"
-#include "thread/Thread.h"
+#include "src/thread/Thread.h"
 
 using namespace std;
+using namespace nacos;
 
 bool testUUID() {
     cout << "in function testUUID" << endl;
@@ -39,6 +40,7 @@ bool testUUIDMT() {
 
     for (int i = 0; i < 10; i++) {
         threads[i]->join();
+        delete threads[i];
     }
 
     cout << "test end..." << endl;

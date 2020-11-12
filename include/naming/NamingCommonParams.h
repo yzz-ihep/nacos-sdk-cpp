@@ -3,11 +3,14 @@
 
 #include "NacosString.h"
 
+namespace nacos{
 class NamingCommonParams {
 public:
     static const NacosString SERVICE_NAME;
 
     static const NacosString CLUSTER_NAME;
+
+    static const NacosString HEALTHY;
 
     static const NacosString NAMESPACE_ID;
 
@@ -24,5 +27,6 @@ public:
     static const NacosString PAGE_SIZE;
     static const NacosString PAGE_NO;
 };
+}//namespace nacos
 
 #endif

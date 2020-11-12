@@ -3,6 +3,7 @@
 
 #include "NacosString.h"
 
+namespace nacos{
 class PropertyKeyConst {
 public:
     static const NacosString CONFIG_FILE_NAME;
@@ -49,6 +50,10 @@ public:
 
     static const NacosString HB_FAIL_WAIT_TIME;
 
+    static const NacosString NACOS_SNAPSHOT_PATH;
+
+    static const NacosString NACOS_LOG_PATH;
+
     /*public static class SystemEnv {
 
         static const NacosString ALIBABA_ALIWARE_ENDPOINT_PORT = "ALIBABA_ALIWARE_ENDPOINT_PORT";
@@ -58,5 +63,6 @@ public:
         static const NacosString ALIBABA_ALIWARE_ENDPOINT_URL = "ALIBABA_ALIWARE_ENDPOINT_URL";
     }*/
 };
+}//namespace nacos
 
 #endif

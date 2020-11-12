@@ -1,11 +1,8 @@
-#include "utils/NetUtils.h"
+#include "NetUtils.h"
 
-NacosString NetUtils::LOCAL_IP;
-
-void NetUtils::Init() {
-    LOCAL_IP = "127.0.0.1";//TODO:read local ip;
-}
+namespace nacos{
 
 NacosString NetUtils::localIP() {
-    return LOCAL_IP;
+    return "127.0.0.1";//TODO:read local ip;
 }
+}//namespace nacos

@@ -1,11 +1,12 @@
 #include <iostream>
 #include "utils//UuidUtils.h"
-#include "thread/Thread.h"
-#include "thread/ThreadLocal.h"
+#include "src/thread/Thread.h"
+#include "src/thread/ThreadLocal.h"
 #include "DebugAssertion.h"
 #include "utils/RandomUtils.h"
 
 using namespace std;
+using namespace nacos;
 
 ThreadLocal<NacosString> threadLocal;
 ThreadLocal<int*> threadLocalPtr(NULL);
@@ -55,7 +56,7 @@ void *ThreadLocalFuncs4PtrWithInitializer(void *param) {
 void *ThreadLocalFuncs(void *param) {
     Thread *thisThread = *((Thread **) param);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100; i++) {
         threadLocal.set(UuidUtils::generateUuid().c_str());
         log_debug("Thread %s UUID: %s\n", thisThread->getThreadName().c_str(), threadLocal.get().c_str());
     }
@@ -77,6 +78,7 @@ bool testThreadLocal() {
 
     for (int i = 0; i < 10; i++) {
         threads[i]->join();
+        delete threads[i];
     }
 
     cout << "test end..." << endl;
@@ -98,6 +100,7 @@ bool testThreadLocalPtr() {
 
     for (int i = 0; i < 10; i++) {
         threads[i]->join();
+        delete threads[i];
     }
 
     cout << "test end..." << endl;
@@ -119,6 +122,7 @@ bool testThreadLocalPtrWithInitializer() {
 
     for (int i = 0; i < 10; i++) {
         threads[i]->join();
+        delete threads[i];
     }
 
     cout << "test end..." << endl;
